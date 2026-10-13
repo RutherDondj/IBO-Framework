@@ -13,7 +13,7 @@ This repository provides the official implementation of the **Inhomogeneous Baye
 ##  Key Contributions
 
 * **Sampling Allocation Theory**: We establish a formal theoretical foundation proving that to equalize acquisition function decay rates across heterogeneous regions, the sampling effort must scale polynomially inverse to local smoothness.
-* **Recursive Partitioning**: We introduce an adaptive tree-based strategy that dynamically subdivides the input domain based on a **non-stationarity ratio** $\rho$. This identifies and isolates regions requiring higher spatial resolution.
+* **Recursive Partitioning**: We introduce an adaptive tree-based strategy that dynamically subdivides the input domain based on a **non-stationarity ratio** $\eta$. This identifies and isolates regions requiring higher spatial resolution.
 * **Locally Scaled Kernels**: Implementation of kernels where regional scale parameters $\sigma_i$ modulate variability, allowing the surrogate model to adapt to local roughness.
 
 ---
