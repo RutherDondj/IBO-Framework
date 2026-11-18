@@ -375,3 +375,95 @@ def paired_comparison(all_histories, f_min=1.0, methods=None, alpha=0.05,
         print("  a star marks an interval excluding zero; the fraction counts")
         print("  the function-seed pairs on which the row method is better.")
     return out
+
+
+def report_final_regret(all_histories, f_min=1.0, methods=None, latex=False):
+    """
+    Final normalised regret NR(T), for every function and method.
+
+    Variables:
+    - all_histories: the suite, in the form the plotting functions expect.
+    - f_min: the common minimum the objectives were shifted to.
+    - methods: the labels to compare; the four of the paper by default.  The
+      first one is the reference of the median ratios printed at the end.
+    - latex: print a tabular environment instead of a console table.
+
+    The regret of each run is divided by its own initial value, so the
+    functions are on a common scale and a value of 0.05 means that 5% of the
+    initial error remains.  The denominator is shared by every method at a
+    given seed, so the ranking within a function is the one the raw gaps give;
+    the last line of each block counts, over the functions, how often each
+    method attains the smallest value.  That count is free of any scale
+    assumption and is the statistic the aggregated curve cannot show.
+    """
+    groups = ['EI', 'PI', 'LCB', 'TS']
+    if methods is None:
+        methods = ["Classic BO", "IBO_1", "IBO_4", "IBO_P"]
+    names = list(all_histories)
+
+    for acq in groups:
+        nr = {}
+        for m in methods:
+            vals = []
+            for n in names:
+                h = np.asarray(all_histories[n][f"{m} - {acq}"], float)
+                # NR(T) = (f(T) - f_min) / (f(0) - f_min), per seed, then
+                # averaged: the denominator varies with the seed, so the
+                # division comes first.
+                denom = h[:, 0] - f_min
+                denom = np.where(denom == 0, 1e-8, denom)
+                vals.append(float(np.mean((h[:, -1] - f_min) / denom)))
+            nr[m] = np.array(vals)
+
+        if latex:
+            print("\n% " + acq)
+            print(r"\begin{tabular}{l" + "r" * len(methods) + "}")
+            print(r"\toprule")
+            print("Function & " + " & ".join(methods) + r" \\")
+            print(r"\midrule")
+            for k, n in enumerate(names):
+                row = [nr[m][k] for m in methods]
+                best = int(np.argmin(row))
+                cells = [(r"\textbf{" + f"{v:.3g}" + "}") if j == best else f"{v:.3g}"
+                         for j, v in enumerate(row)]
+                print(f"{n} & " + " & ".join(cells) + r" \\")
+            print(r"\midrule")
+            wins = [int(sum(np.argmin([nr[m][k] for m in methods]) == j
+                            for k in range(len(names)))) for j in range(len(methods))]
+            print("Wins & " + " & ".join(f"{w}/{len(names)}" for w in wins) + r" \\")
+            print(r"\bottomrule")
+            print(r"\end{tabular}")
+        else:
+            print("\n" + "=" * 68)
+            print(f"  {acq}: final normalised regret  NR(T)")
+            print("=" * 68)
+            print(f"{'function':>12} " + " ".join(f"{m:>12}" for m in methods)
+                  + "   best")
+            for k, n in enumerate(names):
+                row = [nr[m][k] for m in methods]
+                best = methods[int(np.argmin(row))]
+                print(f"{n:>12} " + " ".join(f"{v:12.4g}" for v in row)
+                      + f"   {best}")
+            wins = {m: 0 for m in methods}
+            for k in range(len(names)):
+                wins[methods[int(np.argmin([nr[m][k] for m in methods]))]] += 1
+            print(f"{'wins':>12} " + " ".join(
+                f"{str(wins[m]) + '/' + str(len(names)):>12}" for m in methods))
+
+    # Median over the function-acquisition pairs of the ratio of the reference
+    # to each variant: a value above one favours the variant.
+    print("\n" + "=" * 68)
+    print(f"  median ratio  NR(T) of {methods[0]}  /  NR(T) of the variant")
+    print("=" * 68)
+    ref = methods[0]
+    for m in methods[1:]:
+        ratios = []
+        for acq in groups:
+            for n in names:
+                hr = np.asarray(all_histories[n][f"{ref} - {acq}"], float)
+                hm = np.asarray(all_histories[n][f"{m} - {acq}"], float)
+                dr = np.where(hr[:, 0] - f_min == 0, 1e-8, hr[:, 0] - f_min)
+                dm = np.where(hm[:, 0] - f_min == 0, 1e-8, hm[:, 0] - f_min)
+                ratios.append(np.mean((hr[:, -1] - f_min) / dr)
+                              / np.mean((hm[:, -1] - f_min) / dm))
+        print(f"{m:>12}: {np.median(ratios):.2f}")
