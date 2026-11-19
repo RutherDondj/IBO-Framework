@@ -19,7 +19,7 @@ black-box functions with spatially varying regularity.
   along the axis of largest **non-stationarity ratio** $\eta$, the ratio of
   the regional scale estimates of the two halves, accepting a split only when
   $\eta$ exceeds a threshold $\tau$.
-* **Locally scaled kernels.** The regional scale $\widehat\sigma_i$ multiplies
+* **Locally scaled kernels.** The regional scale $\widehat{\sigma}_i$ multiplies
   the posterior standard deviation on each subdomain, so the acquisition
   explores where the surrogate explains the data badly.  The posterior mean is
   global and therefore continuous across the domain.
@@ -78,7 +78,7 @@ The surrogate is a Matérn kernel of smoothness $\nu = 5/2$.  Its length-scale
 is estimated for each objective by maximum marginal likelihood on an
 independent Sobol design of $n_{\mathrm{init}} + n_{\mathrm{iter}}$ points and
 then held fixed.  Observations are standardised before the surrogate is
-fitted, so that $\widehat\sigma_i$ reflects the local variance of the
+fitted, so that $\widehat{\sigma}_i$ reflects the local variance of the
 objective rather than its absolute magnitude.  The tree has maximum depth 3, a
 threshold $\tau = 1.5$ and a minimum of 16 observations per leaf, and is
 rebuilt from the data every five iterations.  Each configuration is run over
