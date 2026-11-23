@@ -38,12 +38,14 @@ def divide_bounds(bounds, n_parts=2, mode='grid', axis=0):
 
     # mode='grid' creates (n_parts^n_dim) small hyper-rectangles
     if mode == 'grid':
-        for idx in itertools.product(range(n_parts), repeat=n_dim):
+        axes = list(range(min(n_dim, 2)))
+        for idx in itertools.product(range(n_parts), repeat=len(axes)):
             b = bounds.copy()
-            for d in range(n_dim):
-                b[d, 0] = grid_points[d][idx[d]]
-                b[d, 1] = grid_points[d][idx[d] + 1]
+            for d, k in zip(axes, idx):
+                b[d, 0] = grid_points[d][k]
+                b[d, 1] = grid_points[d][k + 1]
             region_bounds.append(b)
+    
 
     # mode='axis' splits only along a single chosen dimension
     elif mode == 'axis':
