@@ -15,7 +15,7 @@ _STYLE = {
     "font.size": 12,
     "axes.titlesize": 13,
     "axes.labelsize": 12,
-    "legend.fontsize": 10,
+    "legend.fontsize": 18,
     "xtick.labelsize": 11,
     "ytick.labelsize": 11,
     "axes.spines.top": False,
